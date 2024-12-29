@@ -1,23 +1,21 @@
--- Inserimento degli ordini
-INSERT INTO ordine (cliente, ordine_code, stato, data_ora_creazione) VALUES ('Mario Rossi', 'AB123', 'IN_CODA', NOW());
-INSERT INTO ordine (cliente, ordine_code, stato, data_ora_creazione) VALUES ('Luca Bianchi', 'CD456', 'IN_CODA', NOW());
-INSERT INTO ordine (cliente, ordine_code, stato, data_ora_creazione) VALUES ('Giulia Verdi', 'EF789', 'IN_CODA', NOW());
+-- Inserisci alcune pizze nella tabella `pizzas`
+INSERT INTO pizzas (name) VALUES
+('Margherita'),
+('Diavola'),
+('Quattro Formaggi'),
+('Capricciosa'),
+('Vegetariana');
 
--- Inserimento delle pizze
-INSERT INTO pizza (nome) VALUES ('Margherita');
-INSERT INTO pizza (nome) VALUES ('Diavola');
-INSERT INTO pizza (nome) VALUES ('Quattro Formaggi');
-INSERT INTO pizza (nome) VALUES ('Capricciosa');
-INSERT INTO pizza (nome) VALUES ('Bufala');
+-- Inserisci alcuni ordini nella tabella `orders`
+INSERT INTO orders (order_code, status, customer_name) VALUES
+('ORD001', 'IN_CODA', 'John Doe'),
+('ORD002', 'IN_PREPARAZIONE', 'Jane Smith'),
+('ORD003', 'COMPLETATO', 'Alice Brown');
 
--- Collega pizze agli ordini con quantità
--- Ordine 1
-INSERT INTO ordine_pizza (ordine_id, pizza_id, quantity) VALUES (1, 1, 2); -- Margherita x2
-INSERT INTO ordine_pizza (ordine_id, pizza_id, quantity) VALUES (1, 2, 1); -- Diavola x1
-
--- Ordine 2
-INSERT INTO ordine_pizza (ordine_id, pizza_id, quantity) VALUES (2, 3, 1); -- Quattro Formaggi x1
-INSERT INTO ordine_pizza (ordine_id, pizza_id, quantity) VALUES (2, 4, 3); -- Capricciosa x3
-
--- Ordine 3
-INSERT INTO ordine_pizza (ordine_id, pizza_id, quantity) VALUES (3, 5, 3); -- Bufala x3
+-- Inserisci associazioni nella tabella `order_pizzas`
+INSERT INTO order_pizzas (order_id, pizza_id, quantity) VALUES
+(1, 1, 2), -- 2 Margherite per il primo ordine
+(1, 2, 1), -- 1 Diavola per il primo ordine
+(2, 3, 1), -- 1 Quattro Formaggi per il secondo ordine
+(2, 4, 2), -- 2 Capricciose per il secondo ordine
+(3, 5, 3); -- 3 Vegetariane per il terzo ordine

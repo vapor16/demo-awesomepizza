@@ -1,21 +1,23 @@
-CREATE TABLE ordine (
+-- Tabella per le pizze
+CREATE TABLE pizzas (
     id BIGSERIAL PRIMARY KEY,
-    cliente VARCHAR(100) NOT NULL,
-    ordine_code VARCHAR(10) UNIQUE NOT NULL,
-    stato VARCHAR(255),
-    data_ora_creazione TIMESTAMP
+    name VARCHAR(255) NOT NULL UNIQUE
 );
 
-CREATE TABLE pizza (
+-- Tabella per gli ordini
+CREATE TABLE orders (
     id BIGSERIAL PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL
+    order_code VARCHAR(255) NOT NULL UNIQUE,
+    status VARCHAR(50) NOT NULL,
+    customer_name VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE ordine_pizza (
-    id BIGSERIAL PRIMARY KEY, -- ID univoco casuale generato
-    ordine_id BIGINT NOT NULL,  -- Chiave esterna verso ordine
-    pizza_id BIGINT NOT NULL,   -- Chiave esterna verso pizza
-    quantity INT NOT NULL,      -- Quantità di questa pizza in questo ordine
-    FOREIGN KEY (ordine_id) REFERENCES ordine(id) ON DELETE CASCADE,
-    FOREIGN KEY (pizza_id) REFERENCES pizza(id) ON DELETE CASCADE
+-- Tabella di associazione tra ordini e pizze con quantità
+CREATE TABLE order_pizzas (
+    id BIGSERIAL PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    pizza_id BIGINT NOT NULL,
+    quantity INT NOT NULL,
+    CONSTRAINT fk_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    CONSTRAINT fk_pizza FOREIGN KEY (pizza_id) REFERENCES pizzas(id) ON DELETE CASCADE
 );

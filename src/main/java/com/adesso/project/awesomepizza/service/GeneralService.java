@@ -1,5 +1,6 @@
 package com.adesso.project.awesomepizza.service;
-import com.adesso.project.awesomepizza.entity.Ordine;
+
+import com.adesso.project.awesomepizza.entity.Order;
 
 import java.util.List;
 
@@ -9,7 +10,7 @@ public interface GeneralService<T, ID> {
     T create(T entity);
 
     // CREATE
-    Ordine create(Ordine ordine);
+    Order create(Order order);
 
     // READ
     T findById(ID id);

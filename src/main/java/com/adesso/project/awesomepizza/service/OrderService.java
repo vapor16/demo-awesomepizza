@@ -1,76 +1,86 @@
 package com.adesso.project.awesomepizza.service;
 
-import com.adesso.project.awesomepizza.entity.Ordine;
+import com.adesso.project.awesomepizza.dto.request.PizzaRequestDTO;
+import com.adesso.project.awesomepizza.entity.Order;
+import com.adesso.project.awesomepizza.entity.OrderPizza;
+import com.adesso.project.awesomepizza.entity.Pizza;
 import com.adesso.project.awesomepizza.entity.StatoOrdine;
 import com.adesso.project.awesomepizza.exception.OrderNotFoundException;
 import com.adesso.project.awesomepizza.exception.PizzaValidationException;
-import com.adesso.project.awesomepizza.repository.OrdineRepository;
+import com.adesso.project.awesomepizza.repository.OrderRepository;
+import com.adesso.project.awesomepizza.repository.PizzaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
-public class OrderService implements GeneralService<Ordine,Long> {
-
-    private OrdineRepository ordineRepository;
-
-    // CREATE
-    @Override
-    public Ordine create(Ordine ordine) {
-        if (ordine.getOrdinePizze() == null || ordine.getOrdinePizze().isEmpty()) {
-            throw new PizzaValidationException("Order must contain at least one pizza.");
-        }
-        ordine.setStato(StatoOrdine.IN_CODA);
-        ordine.setDataOraCreazione(LocalDateTime.now());
-        return ordineRepository.save(ordine);
-    }
-    // READ
-    @Override
-    public Ordine findById(Long id) {
-        return ordineRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ordine non trovato"));
-    }
-    @Override
-    public List<Ordine> findAll() {
-        return ordineRepository.findAll();
-    }
-    public List<Ordine> findOrderCoda() {
-        return ordineRepository.findByStato(StatoOrdine.IN_CODA);
-    }
-
-    // UPDATE
-    @Override
-    public Ordine update(Long id, Ordine ordineAggiornato) {
-        Ordine ordine = findById(id);
-        ordine.setCliente(ordineAggiornato.getCliente());
-        ordine.setOrdinePizze(ordineAggiornato.getOrdinePizze());
-        ordine.setStato(ordineAggiornato.getStato());
-        return ordineRepository.save(ordine);
-    }
-
-    public Ordine updateStato(Long id, StatoOrdine nuovoStato) {
-        Ordine ordine = findById(id);
-        ordine.setStato(nuovoStato);
-        return ordineRepository.save(ordine);
-    }
-
-    // DELETE
-    @Override
-    public void delete(Long id) {
-        if (!ordineRepository.existsById(id)) {
-            throw new OrderNotFoundException("Ordine N: " + id + " non trovato, impossibile eliminarlo.");
-        }
-        try {
-            ordineRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Errore durante l'eliminazione dell'ordine con ID " + id, e);
-        }
-    }
+public class OrderService {
 
     @Autowired
-    public void setOrdineRepository(OrdineRepository ordineRepository) {
-        this.ordineRepository = ordineRepository;
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private PizzaRepository pizzaRepository;
+
+    public Order createOrder(String customerName, List<PizzaRequestDTO> pizzas) {
+        if (customerName == null || customerName.isBlank()) {
+            throw new PizzaValidationException("Customer name cannot be null or empty");
+        }
+
+        if (pizzas == null || pizzas.isEmpty()) {
+            throw new PizzaValidationException("At least one pizza must be included in the order");
+        }
+
+        Order order = new Order();
+        order.setOrderCode(UUID.randomUUID().toString());
+        order.setStatus(StatoOrdine.IN_CODA);
+        order.setCustomerName(customerName);
+
+        for (PizzaRequestDTO pizzaRequest : pizzas) {
+            Pizza pizza = pizzaRepository.findByName(pizzaRequest.getName())
+                    .orElseThrow(() -> new PizzaValidationException("Pizza with name " + pizzaRequest.getName() + " not found"));
+
+            if (pizzaRequest.getQuantity() == null || pizzaRequest.getQuantity() <= 0) {
+                throw new PizzaValidationException("Invalid quantity for pizza name " + pizzaRequest.getName());
+            }
+
+            OrderPizza orderPizza = new OrderPizza();
+            orderPizza.setOrder(order);
+            orderPizza.setPizza(pizza);
+            orderPizza.setQuantity(pizzaRequest.getQuantity());
+            order.getPizzas().add(orderPizza);
+        }
+
+        return orderRepository.save(order);
     }
+
+    public List<Order> getOrderQueue() {
+        List<Order> orders = orderRepository.findAll();
+        if (orders.isEmpty()) {
+            throw new OrderNotFoundException("No orders found in the queue");
+        }
+        return orders;
+    }
+
+    public Order getOrderStatus(String orderCode) {
+        return orderRepository.findByOrderCode(orderCode)
+                .orElseThrow(() -> new OrderNotFoundException("Order with code " + orderCode + " not found"));
+
+    }
+
+    public Order updateOrderStatus(String orderCode, StatoOrdine status) {
+        if (status == null) {
+            throw new PizzaValidationException("Status cannot be null");
+        }
+
+        Order order = orderRepository.findByOrderCode(orderCode)
+                .orElseThrow(() -> new OrderNotFoundException("Order with code " + orderCode + " not found"));
+
+
+        order.setStatus(status);
+        return orderRepository.save(order);
+    }
+
 }
