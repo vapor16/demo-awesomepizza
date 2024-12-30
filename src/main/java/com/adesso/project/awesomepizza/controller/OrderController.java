@@ -1,12 +1,14 @@
 package com.adesso.project.awesomepizza.controller;
 
 import com.adesso.project.awesomepizza.dto.request.OrderRequestDTO;
+import com.adesso.project.awesomepizza.dto.response.GeneralResponse;
+import com.adesso.project.awesomepizza.dto.response.OrderPizzaResponseDTO;
 import com.adesso.project.awesomepizza.dto.response.OrderResponseDTO;
-import com.adesso.project.awesomepizza.dto.response.PizzaResponseDTO;
 import com.adesso.project.awesomepizza.entity.Order;
 import com.adesso.project.awesomepizza.entity.StatoOrdine;
 import com.adesso.project.awesomepizza.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,6 +46,13 @@ public class OrderController {
         return mapToResponseDTO(order);
     }
 
+    @DeleteMapping("/{orderCode}")
+    public ResponseEntity<GeneralResponse> deleteOrder(@PathVariable String orderCode) {
+        orderService.deleteOrder(orderCode);
+        var response = new GeneralResponse("Ordine: '" + orderCode + "' eliminato con successo.");
+        return ResponseEntity.ok(response);
+    }
+
     private OrderResponseDTO mapToResponseDTO(Order order) {
         OrderResponseDTO response = new OrderResponseDTO();
         response.setOrderCode(order.getOrderCode());
@@ -51,7 +60,7 @@ public class OrderController {
         response.setCustomerName(order.getCustomerName());
         response.setPizzas(order.getPizzas().stream()
                 .map(orderPizza -> {
-                    PizzaResponseDTO pizzaResponse = new PizzaResponseDTO();
+                    OrderPizzaResponseDTO pizzaResponse = new OrderPizzaResponseDTO();
                     pizzaResponse.setName(orderPizza.getPizza().getName());
                     pizzaResponse.setQuantity(orderPizza.getQuantity());
                     return pizzaResponse;

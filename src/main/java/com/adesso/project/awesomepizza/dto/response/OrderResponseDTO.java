@@ -9,5 +9,5 @@ public class OrderResponseDTO {
     private String orderCode;
     private String status;
     private String customerName;
-    private List<PizzaResponseDTO> pizzas;
+    private List<OrderPizzaResponseDTO> pizzas;
 }
